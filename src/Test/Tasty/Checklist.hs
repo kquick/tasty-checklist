@@ -91,15 +91,16 @@ type CanCheck = (?checker :: IORef [CheckResult])
 -- exit from the test, reports any (and all) failed checks as a test
 -- failure.
 
-withChecklist :: (MonadIO m) => Text -> (CanCheck => m ()) -> m ()
+withChecklist :: (MonadIO m) => Text -> (CanCheck => m a) -> m a
 withChecklist topMsg t = do
   checks <- liftIO $ newIORef mempty
-  let ?checker = checks in t
+  r <- let ?checker = checks in t
   -- If t failed, never get here:
   liftIO $ do
     collected <- List.reverse <$> readIORef checks
     unless (null collected) $
       throwIO (ChecklistFailures topMsg collected)
+  return r
 
 -- | This is used to run a check within the code.  The first argument
 -- is the "name" of this check, the second is a function that takes a
