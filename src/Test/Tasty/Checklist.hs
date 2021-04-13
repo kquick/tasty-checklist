@@ -97,7 +97,7 @@ withChecklist topMsg t = do
   let ?checker = checks in t
   -- If t failed, never get here:
   liftIO $ do
-    collected <- readIORef checks
+    collected <- List.reverse <$> readIORef checks
     unless (null collected) $
       throwIO (ChecklistFailures topMsg collected)
 
@@ -134,7 +134,7 @@ check :: (CanCheck, TestShow a, MonadIO m)
 check what eval val = unless (eval val) $ do
   let chk = CheckFailed what $ T.pack $ testShow val
   liftIO $ do
-    modifyIORef ?checker (<> [chk])
+    modifyIORef ?checker (chk:)
     -- generate some output so the user can see this check failed,
     -- even if the main test fails and the ChecklistFailures isn't thrown.
     putStrLn $ "⚠ " <> show chk
