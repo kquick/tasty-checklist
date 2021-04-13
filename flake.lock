@@ -1,0 +1,82 @@
+{
+  "nodes": {
+    "levers": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1618271144,
+        "narHash": "sha256-3Lb1V/Mi8Oye5c863bSzz+4Rou746ASWEFx7/QMyEmw=",
+        "owner": "kquick",
+        "repo": "nix-levers",
+        "rev": "9c0cd975d12fa5b1f3eca5835fa4ac78ebd30180",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kquick",
+        "repo": "nix-levers",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1603791972,
+        "narHash": "sha256-nj2SvACFH+NERpye1kudcuygCcvnsZYv26M2+wgM5vE=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "cd63096d6d887d689543a0b97743d28995bc9bc3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "20.09",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "parameterized-utils-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1616891412,
+        "narHash": "sha256-ekgTl0jh0vspf4UkpQP3MX8hG61w4zkAmwlThzDrk9c=",
+        "owner": "GaloisInc",
+        "repo": "parameterized-utils",
+        "rev": "b2e9cc34a58e5931cf14beca2c5bc28f343cf966",
+        "type": "github"
+      },
+      "original": {
+        "owner": "GaloisInc",
+        "repo": "parameterized-utils",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "levers": "levers",
+        "nixpkgs": "nixpkgs",
+        "parameterized-utils-src": "parameterized-utils-src",
+        "tasty-expected-failure-src": "tasty-expected-failure-src"
+      }
+    },
+    "tasty-expected-failure-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1613494231,
+        "narHash": "sha256-C/IWktTILklfPEAht/RE4IC8to6MrvrLmmbqgWsJlIM=",
+        "owner": "nomeata",
+        "repo": "tasty-expected-failure",
+        "rev": "33b71e694b954e35c05859fff3ca886d8cfe5bfe",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nomeata",
+        "repo": "tasty-expected-failure",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
