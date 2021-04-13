@@ -57,6 +57,18 @@ main = defaultMain $ testGroup "Checklist testing"
           :> Val "odd answer" oddAnswer False
          )
 
+       , expectFailBecause "2 values don't match and exception" $
+         testCase "someFun 3 result and exception" $
+         withChecklist "someFun" $ do
+           someFun 3 `checkValues`
+             (Empty
+              :> Val "foo" foo 42
+              :> Val "baz" baz "The answer to the universe"
+              :> Val "shown" show "The answer to the universe is 42!"
+              :> Val "odd answer" oddAnswer False
+             )
+           3 @=? (5 :: Int)
+
        , testCase "noshow object" $
          withChecklist "opaque object" $
          genOpaque `checkValues`
