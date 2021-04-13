@@ -50,13 +50,14 @@ module Test.Tasty.Checklist
 where
 
 import           Control.Exception
-import           Control.Monad ( unless )
+import           Control.Monad ( unless, when )
 import           Control.Monad.IO.Class ( MonadIO, liftIO )
 import           Data.IORef
 import qualified Data.List as List
 import qualified Data.Parameterized.Context as Ctx
 import           Data.Text ( Text )
 import qualified Data.Text as T
+import           System.IO ( hPutStr, hPutStrLn, stderr )
 
 
 -- | The ChecklistFailures exception is thrown if any checks have
@@ -135,10 +136,13 @@ check :: (CanCheck, TestShow a, MonadIO m)
 check what eval val = unless (eval val) $ do
   let chk = CheckFailed what $ T.pack $ testShow val
   liftIO $ do
+    firstFail <- null <$> readIORef ?checker
     modifyIORef ?checker (chk:)
     -- generate some output so the user can see this check failed,
     -- even if the main test fails and the ChecklistFailures isn't thrown.
-    putStrLn $ "⚠ " <> show chk
+    when firstFail $ hPutStrLn stderr "" >> hPutStr stderr "        "
+    hPutStrLn stderr $ "⚠ " <> show chk
+    hPutStr stderr "        "
 
 
 -- | Sometimes checks are provided in common testing code, often in
