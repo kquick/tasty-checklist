@@ -53,5 +53,19 @@
             parameterized-utils-src {
             };
         });
+
+      checks = levers.eachSystem (system:
+        let mkHaskell = levers.mkHaskellPkg {
+              inherit nixpkgs system;
+            };
+            pkgs = import nixpkgs { inherit system; };
+        in {
+          tasty-checklist-check = mkHaskell "tasty-checklist-check" self {
+            adjustDrv = args: drv: pkgs.haskell.lib.doCheck drv;
+            parameterized-utils = self.packages.${system}.parameterized-utils;
+            tasty-expected-failure = self.packages.${system}.tasty-expected-failure;
+          };
+        });
+
     };
 }
