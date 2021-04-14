@@ -13,7 +13,7 @@ import Test.Tasty.Checklist
 main :: IO ()
 main = defaultMain $ testGroup "Checklist testing"
        [
-         expectFail $
+         expectFailBecause "3 failed checks" $
          testCase "simple checklist" $
          withChecklist "simple" $ do
            let tst :: Int -> Bool
@@ -24,7 +24,7 @@ main = defaultMain $ testGroup "Checklist testing"
            check "three" tst 3
            check "four" tst 4
 
-       , expectFail $
+       , expectFailBecause "2 failed checks" $
          testCase "simple checklist with retraction" $
          withChecklist "simple retracted" $ do
            let tst :: Int -> Bool
@@ -36,7 +36,20 @@ main = defaultMain $ testGroup "Checklist testing"
            check "four" tst 4
            discardCheck "two"
 
-       , testCase "someFun 7 result" $
+       , expectFailBecause "3 failed checks and assert" $
+         testCase "simple checklist and assert" $
+         withChecklist "simple" $ do
+           let tst :: Int -> Bool
+               tst = (> 3)
+           check "one" tst 1
+           check "two" tst 2
+           check "five" tst 5
+           check "three" tst 3
+           check "four" tst 4
+           3 @=? (4 :: Int)
+
+       , testCase "someFun 7 result is good" $
+         -- everything should pass, no check failures
          withChecklist "someFun 7" $
          someFun 7 `checkValues`
          (Empty
@@ -57,8 +70,13 @@ main = defaultMain $ testGroup "Checklist testing"
           :> Val "odd answer" oddAnswer False
          )
 
-       , expectFailBecause "2 values don't match and exception" $
-         testCase "someFun 3 result and exception" $
+       , expectFailBecause "assertion" $
+         testCase "normal assert failure" $
+         withChecklist "asserts" $ do
+           3 @=? (5 :: Int)
+
+       , expectFailBecause "2 values don't match and assertion" $
+         testCase "someFun 3 result and assert" $
          withChecklist "someFun" $ do
            someFun 3 `checkValues`
              (Empty
@@ -69,7 +87,9 @@ main = defaultMain $ testGroup "Checklist testing"
              )
            3 @=? (5 :: Int)
 
-       , testCase "noshow object" $
+       , testCase "object w/o Show is OK" $
+         -- The test object has a TestShow instance but no Show
+         -- instance.  The test should pass, no checks or failures
          withChecklist "opaque object" $
          genOpaque `checkValues`
          (Empty
@@ -79,8 +99,9 @@ main = defaultMain $ testGroup "Checklist testing"
           :> Val "the answer" answer 19
          )
 
-       , expectFailBecause "revealed test is bad" $
-         testCase "noshow object bad comparison" $
+       , expectFailBecause "revealed test check fails" $
+         -- The test object has a TestShow but no Show
+         testCase "object w/o Show bad comparison" $
          withChecklist "opaque object bad expected" $
          genOpaque `checkValues`
          (Empty
