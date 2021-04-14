@@ -224,14 +224,16 @@ discardCheck what = do
 
 checkValues :: CanCheck
             => TestShow dType
-            => dType -> Ctx.Assignment (DerivedVal dType) idx -> IO ()
-checkValues got expF =
-  withChecklist (T.pack $ "on input " <> testShow got) $
-  Ctx.traverseWithIndex_ (chkValue got) expF
+            => dType -> Ctx.Assignment (DerivedVal dType) idx ->  IO ()
+checkValues got expF = Ctx.traverseWithIndex_ (chkValue got) expF
+
 
 chkValue :: CanCheck
-            => dType -> Ctx.Index idx valType -> DerivedVal dType valType -> IO ()
-chkValue got _idx (Val txt fld v) = check txt (fld got ==) v
+         => TestShow dType
+         => dType -> Ctx.Index idx valType -> DerivedVal dType valType -> IO ()
+chkValue got _idx (Val txt fld v) =
+  check (txt <> " on input «" <> T.pack (testShow got) <> "»") (fld got ==) v
+
 
 -- | Each entry in the 'Data.Parameterized.Context.Assignment' list
 -- for 'checkValues' should be one of these 'DerivedVal' values.
