@@ -49,15 +49,16 @@ module Test.Tasty.Checklist
   )
 where
 
-import           Control.Exception
-import           Control.Monad ( unless, when )
+import           Control.Exception ( evaluate )
+import           Control.Monad ( unless )
+import           Control.Monad.Catch
 import           Control.Monad.IO.Class ( MonadIO, liftIO )
 import           Data.IORef
 import qualified Data.List as List
 import qualified Data.Parameterized.Context as Ctx
 import           Data.Text ( Text )
 import qualified Data.Text as T
-import           System.IO ( hPutStr, hPutStrLn, stderr )
+import           System.IO ( hFlush, hPutStrLn, stdout, stderr )
 
 
 -- | The ChecklistFailures exception is thrown if any checks have
@@ -92,15 +93,26 @@ type CanCheck = (?checker :: IORef [CheckResult])
 -- exit from the test, reports any (and all) failed checks as a test
 -- failure.
 
-withChecklist :: (MonadIO m) => Text -> (CanCheck => m a) -> m a
+withChecklist :: (MonadIO m, MonadMask m)
+              => Text -> (CanCheck => m a) -> m a
 withChecklist topMsg t = do
   checks <- liftIO $ newIORef mempty
-  r <- let ?checker = checks in t
+  r <- (let ?checker = checks in t)
+       `onException` (liftIO $
+                       do cs <- List.reverse <$> readIORef checks
+                          unless (null cs) $ do
+                            hFlush stdout
+                            hPutStrLn stderr ""
+                            let pfx = "        ⚠ "
+                            mapM_ (hPutStrLn stderr . (pfx <>) . show) cs
+                            hFlush stderr
+                     )
+
   -- If t failed, never get here:
   liftIO $ do
     collected <- List.reverse <$> readIORef checks
     unless (null collected) $
-      throwIO (ChecklistFailures topMsg collected)
+      throwM (ChecklistFailures topMsg collected)
   return r
 
 -- | This is used to run a check within the code.  The first argument
@@ -133,16 +145,11 @@ withChecklist topMsg t = do
 
 check :: (CanCheck, TestShow a, MonadIO m)
       => Text -> (a -> Bool) -> a -> m ()
-check what eval val = unless (eval val) $ do
-  let chk = CheckFailed what $ T.pack $ testShow val
-  liftIO $ do
-    firstFail <- null <$> readIORef ?checker
-    modifyIORef ?checker (chk:)
-    -- generate some output so the user can see this check failed,
-    -- even if the main test fails and the ChecklistFailures isn't thrown.
-    when firstFail $ hPutStrLn stderr "" >> hPutStr stderr "        "
-    hPutStrLn stderr $ "⚠ " <> show chk
-    hPutStr stderr "        "
+check what eval val = do
+  r <- liftIO $ evaluate (eval val)
+  unless r $ do
+    let chk = CheckFailed what $ T.pack $ testShow val
+    liftIO $ modifyIORef ?checker (chk:)
 
 
 -- | Sometimes checks are provided in common testing code, often in
