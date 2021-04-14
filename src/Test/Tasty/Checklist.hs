@@ -50,7 +50,7 @@ module Test.Tasty.Checklist
 where
 
 import           Control.Exception ( evaluate )
-import           Control.Monad ( unless )
+import           Control.Monad ( join, unless )
 import           Control.Monad.Catch
 import           Control.Monad.IO.Class ( MonadIO, liftIO )
 import           Data.IORef
@@ -225,7 +225,8 @@ discardCheck what = do
 checkValues :: CanCheck
             => TestShow dType
             => dType -> Ctx.Assignment (DerivedVal dType) idx ->  IO ()
-checkValues got expF = Ctx.traverseWithIndex_ (chkValue got) expF
+checkValues got expF =
+  join $ evaluate <$> Ctx.traverseWithIndex_ (chkValue got) expF
 
 
 chkValue :: CanCheck
