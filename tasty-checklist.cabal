@@ -16,6 +16,10 @@ copyright:          Kevin Quick, 2021
 category:           Testing
 extra-source-files: CHANGELOG.md
 
+source-repository head
+   type: git
+   location: https://github.com/kquick/tasty-checklist
+
 common bldspec
   ghc-options:      -Wall
                     -Wcompat
