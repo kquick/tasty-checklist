@@ -79,8 +79,8 @@ instance Show CheckResult where
 instance Show ChecklistFailures where
   show (ChecklistFailures topMsg fails) =
     "ERROR: " <> T.unpack topMsg <> "\n  " <>
-    show (length fails) <> " checks failed in this checklist:\n  ↪" <>
-    List.intercalate "\n  ↪" (show <$> fails)
+    show (length fails) <> " checks failed in this checklist:\n  -" <>
+    List.intercalate "\n  -" (show <$> fails)
 
 -- | A convenient Constraint to apply to functions that will perform
 -- checks (i.e. call 'check' one or more times)
@@ -103,7 +103,7 @@ withChecklist topMsg t = do
                           unless (null cs) $ do
                             hFlush stdout
                             hPutStrLn stderr ""
-                            let pfx = "        ⚠ "
+                            let pfx = "        WARN "
                             mapM_ (hPutStrLn stderr . (pfx <>) . show) cs
                             hFlush stderr
                      )
@@ -132,8 +132,8 @@ withChecklist topMsg t = do
 -- tst1: FAIL
 --   Exception: ERROR: numbers
 --     2 checks failed in this checklist:
---     ↪Failed check of "two is odd" with "2"
---     ↪Failed check of "7 + 3 is odd" with "10"
+--     -Failed check of "two is odd" with "2"
+--     -Failed check of "7 + 3 is odd" with "10"
 --
 -- Any check failures are also printed to stdout (and omitted from the
 -- above for clarity).  This is so that those failures are reported
@@ -215,8 +215,8 @@ discardCheck what = do
 -- >>> defaultMain test
 -- ERROR: on input "The answer to the universe is 18?"
 --   2 checks failed:
---   ↪Failed check of "foo" with "42"
---   ↪Failed check of "shown" with "The answer to the universe is 42!"
+--   -Failed check of "foo" with "42"
+--   -Failed check of "shown" with "The answer to the universe is 42!"
 --
 -- In this case, several of the values checked were correct, but more
 -- than one was wrong.  Helpfully, this test output lists /all/ the
@@ -233,7 +233,11 @@ chkValue :: CanCheck
          => TestShow dType
          => dType -> Ctx.Index idx valType -> DerivedVal dType valType -> IO ()
 chkValue got _idx (Val txt fld v) =
-  check (txt <> " on input «" <> T.pack (testShow got) <> "»") (fld got ==) v
+  let r = fld got
+      msg = txt <> " on input <<" <> ti <> ">> got <<" <> tr <> ">>"
+      ti = T.pack (testShow got)
+      tr = T.pack (testShow r)
+  in check msg (r ==) v
 
 
 -- | Each entry in the 'Data.Parameterized.Context.Assignment' list
