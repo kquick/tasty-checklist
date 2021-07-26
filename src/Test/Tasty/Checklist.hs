@@ -40,6 +40,7 @@ module Test.Tasty.Checklist
   , CanCheck
   , check
   , discardCheck
+  -- $setup
   , checkValues
   , DerivedVal(Val, Got)
   -- * Error reporting
@@ -122,6 +123,8 @@ withChecklist topMsg t = do
 -- value fails the check.  The last argument is the value to check.
 --
 -- >>> :set -XOverloadedStrings
+-- >>> import Test.Tasty
+-- >>> import Test.Tasty.HUnit
 -- >>> :{
 -- >>> defaultMain $ testCase "odd numbers" $ withChecklist "odds" $ do
 -- >>>  let three = 3 :: Int
@@ -130,11 +133,14 @@ withChecklist topMsg t = do
 -- >>>  check "7 + 3 is odd" odd $ 7 + three
 -- >>>  check "7 is odd" odd (7 :: Int)
 -- >>> :}
--- tst1: FAIL
---   Exception: ERROR: numbers
+-- odd numbers: FAIL
+--   Exception: ERROR: odds
 --     2 checks failed in this checklist:
---     -Failed check of "two is odd" with "2"
---     -Failed check of "7 + 3 is odd" with "10"
+--     -Failed check of two is odd with 2
+--     -Failed check of 7 + 3 is odd with 10
+-- <BLANKLINE>
+-- 1 out of 1 tests failed (...s)
+-- *** Exception: ExitFailure 1
 --
 -- Any check failures are also printed to stdout (and omitted from the
 -- above for clarity).  This is so that those failures are reported
@@ -171,6 +177,57 @@ discardCheck what = do
 
 ----------------------------------------------------------------------
 
+-- $checkValues
+--
+-- Implementing a number of discrete 'check' calls can be tedious,
+-- especially when they are validating different aspects of the same
+-- result value.  To facilitate this, the 'checkValues' function can
+-- be used along with a type-safe list of checks to perform.
+--
+-- To demonstrate this, first consider the following sample program,
+-- which has code that generates a complex @Struct@ value, along with
+-- tests for various fields in that @Struct@.
+
+-- $setup
+-- >>> :set -XPatternSynonyms
+-- >>> :set -XOverloadedStrings
+-- >>>
+-- >>> import Data.Parameterized.Context ( pattern Empty, pattern (:>) )
+-- >>> import Test.Tasty.Checklist
+-- >>> import Test.Tasty
+-- >>> import Test.Tasty.HUnit
+-- >>>
+-- >>> :{
+-- >>> data Struct = MyStruct { foo :: Int, bar :: Char, baz :: String }
+-- >>>
+-- >>> instance Show Struct where
+-- >>>    show s = baz s <> " is " <> show (foo s) <> [bar s]
+-- >>> instance TestShow Struct where testShow = show
+-- >>>
+-- >>> someFun :: Int -> Struct
+-- >>> someFun n = MyStruct (n * 6)
+-- >>>               (if n * 6 == 42 then '!' else '?')
+-- >>>               "The answer to the universe"
+-- >>>
+-- >>> oddAnswer :: Struct -> Bool
+-- >>> oddAnswer = odd . foo
+-- >>>
+-- >>> test = testCase "someFun result" $
+-- >>>    withChecklist "results for someFun" $
+-- >>>    someFun 3 `checkValues`
+-- >>>         (Empty
+-- >>>         :> Val "foo" foo 42
+-- >>>         :> Val "baz field" baz "The answer to the universe"
+-- >>>         :> Val "shown" show "The answer to the universe is 42!"
+-- >>>         :> Val "odd answer" oddAnswer False
+-- >>>         :> Got "even answer" (not . oddAnswer)
+-- >>>         :> Val "double-checking foo" foo 42
+-- >>>         )
+-- >>> :}
+--
+-- This code will be used below to demonstrate various advanced
+-- checklist capabilities.
+
 -- | The 'checkValues' is a checklist that tests various values that
 -- can be derived from the input value.  The input value is provided,
 -- along with an 'Data.Parameterized.Context.Assignment' list of
@@ -181,43 +238,19 @@ discardCheck what = do
 -- This is convenient to gather together a number of validations on a
 -- single datatype and represent them economically.
 --
--- One example is testing the fields of a record structure:
---
--- > {-# LANGUAGE PatternSynonyms, OverloadedStrings #-}
--- >
--- > import Data.Parameterized.Context ( pattern Empty, pattern (:>) )
--- > import Test.Tasty.Checklist
--- >
--- > data Struct = MyStruct { foo :: Int, bar :: Char, baz :: String }
--- >
--- > instance Show Struct where
--- >    show s = baz s <> " is " <> foo s <> bar s
--- >
--- > someFun :: Int -> Struct
--- > someFun n = MyStruct (n * 6)
--- >               (if n * 6 == 42 then '!' else '?')
--- >               "The answer to the universe"
--- >
--- > oddAnswer :: Struct -> Bool
--- > oddAnswer = odd . foo
--- >
--- > test = testCase "someFun result" $
--- >    someFun 3 `checkValues`
--- >         (Empty
--- >         :> Val "foo" foo 42
--- >         :> Val "baz field" baz "The answer to the universe"
--- >         :> Val "shown" show "The answer to the universe is 42!"
--- >         :> Val "odd answer" oddAnswer False
--- >         :> Val "double-checking foo" foo 42
--- >         )
---
--- Running this test:
+-- One example is testing the fields of a record structure, given the
+-- above code:
 --
 -- >>> defaultMain test
--- ERROR: on input "The answer to the universe is 18?"
---   2 checks failed:
---   -Failed check of "foo" with "42"
---   -Failed check of "shown" with "The answer to the universe is 42!"
+-- someFun result: FAIL
+--   Exception: ERROR: results for someFun
+--     3 checks failed in this checklist:
+--     -Failed check of foo on input <<The answer to the universe is 18?>> expected <<42>> but failed with 18
+--     -Failed check of shown on input <<The answer to the universe is 18?>> expected <<"The answer to the universe is 42!">> but failed with "The answer to the universe is 18?"
+--     -Failed check of double-checking foo on input <<The answer to the universe is 18?>> expected <<42>> but failed with 18
+-- <BLANKLINE>
+-- 1 out of 1 tests failed (...s)
+-- *** Exception: ExitFailure 1
 --
 -- In this case, several of the values checked were correct, but more
 -- than one was wrong.  Helpfully, this test output lists /all/ the
