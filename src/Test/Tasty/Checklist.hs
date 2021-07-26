@@ -3,6 +3,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE ImplicitParams #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeSynonymInstances #-}
@@ -68,13 +69,13 @@ data ChecklistFailures = ChecklistFailures Text [CheckResult]
 
 -- | The 'CheckResult' captures the failure information for a check
 
-data CheckResult = CheckFailed Text Text
+data CheckResult = CheckFailed Text Text  -- check name from user, fail message
 
 instance Exception ChecklistFailures
 
 instance Show CheckResult where
-  show (CheckFailed what val) =
-    "Failed check of " <> T.unpack what <> " against " <> show val
+  show (CheckFailed what msg) =
+    "Failed check of " <> T.unpack what <> " with " <> T.unpack msg
 
 instance Show ChecklistFailures where
   show (ChecklistFailures topMsg fails) =
@@ -232,13 +233,13 @@ checkValues got expF =
 chkValue :: CanCheck
          => TestShow dType
          => dType -> Ctx.Index idx valType -> DerivedVal dType valType -> IO ()
-chkValue got _idx (Val txt fld v) =
-  let r = fld got
-      msg = txt <> " on input <<" <> ti <> ">> got <<" <> tr <> ">>"
-      ti = T.pack (testShow got)
-      tr = T.pack (testShow r)
-  in check msg (r ==) v
-
+chkValue got _idx = \case
+  (Val txt fld v) ->
+    let r = fld got
+        msg = txt <> " on input <<" <> ti <> ">> expected <<" <> tv <> ">> but failed"
+        ti = T.pack (testShow got)
+        tv = T.pack (testShow v)
+    in check msg (v ==) r
 
 -- | Each entry in the 'Data.Parameterized.Context.Assignment' list
 -- for 'checkValues' should be one of these 'DerivedVal' values.
