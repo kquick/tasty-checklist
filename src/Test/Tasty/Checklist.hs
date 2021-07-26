@@ -36,14 +36,19 @@
 
 module Test.Tasty.Checklist
   (
+    -- * Checklist testing context
     withChecklist
   , CanCheck
+  -- * Performing or Disabling checks
   , check
   , discardCheck
+  -- * Type-safe multi-check specifications
+  -- $checkValues
   -- $setup
   , checkValues
   , DerivedVal(Val, Got)
   -- * Error reporting
+  , CheckResult
   , ChecklistFailures
   -- * Displaying tested values
   , TestShow(testShow)
@@ -68,7 +73,7 @@ import           System.IO ( hFlush, hPutStrLn, stdout, stderr )
 
 data ChecklistFailures = ChecklistFailures Text [CheckResult]
 
--- | The 'CheckResult' captures the failure information for a check
+-- | The internal 'CheckResult' captures the failure information for a check
 
 data CheckResult = CheckFailed Text Text  -- check name from user, fail message
 
@@ -145,10 +150,10 @@ withChecklist topMsg t = do
 -- Any check failures are also printed to stdout (and omitted from the
 -- above for clarity).  This is so that those failures are reported
 -- even if a more standard test assertion is used that prevents
--- completion of the checklist.  Thus, if an `assertEqual "values"
--- three 7` had been added to the above, that would have been the only
+-- completion of the checklist.  Thus, if an @assertEqual "values"
+-- three 7@ had been added to the above, that would have been the only
 -- actual (and immediate) fail for the test, but any failing 'check's
--- appearing before that 'assertEqual' would still have printed.
+-- appearing before that @assertEqual@ would still have printed.
 
 check :: (CanCheck, TestShow a, MonadIO m)
       => Text -> (a -> Bool) -> a -> m ()
