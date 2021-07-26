@@ -84,6 +84,7 @@ main = defaultMain $ testGroup "Checklist testing"
               :> Val "baz" baz "The answer to the universe"
               :> Val "shown" show "The answer to the universe is 42!"
               :> Val "odd answer" oddAnswer False
+              :> Got "even answer" (not . oddAnswer)
              )
            3 @=? (5 :: Int)
 

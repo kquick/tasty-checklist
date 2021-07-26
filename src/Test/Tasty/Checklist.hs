@@ -41,7 +41,7 @@ module Test.Tasty.Checklist
   , check
   , discardCheck
   , checkValues
-  , DerivedVal(Val)
+  , DerivedVal(Val, Got)
   -- * Error reporting
   , ChecklistFailures
   -- * Displaying tested values
@@ -240,12 +240,30 @@ chkValue got _idx = \case
         ti = T.pack (testShow got)
         tv = T.pack (testShow v)
     in check msg (v ==) r
+  (Got txt fld) ->
+    let r = fld got
+        msg = txt <> " on input <<" <> ti <> ">>"
+        ti = T.pack (testShow got)
+    in check msg (True ==) r
 
 -- | Each entry in the 'Data.Parameterized.Context.Assignment' list
 -- for 'checkValues' should be one of these 'DerivedVal' values.
 
 data DerivedVal i d where
+
+  -- | Val allows specification of a description string, an extraction
+  -- function, and the expected value to be extracted.  The
+  -- 'checkValues' function will add a Failure if the expected value is
+  -- not obtained.
   Val :: (TestShow d, Eq d) => Text -> (i -> d) -> d -> DerivedVal i d
+
+  -- | Got allow specification of a description string and an
+  -- extraction function.  The 'checkValues' function will add a
+  -- Failure if the extraction result is False.
+  --
+  -- > Val "what" f True === Got "what" f
+  --
+  Got :: Text -> (i -> Bool) -> DerivedVal i Bool
 
 ----------------------------------------------------------------------
 
