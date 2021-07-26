@@ -69,7 +69,7 @@ test-suite checklistDocTests
   main-is:          DocTestChecklist.hs
   build-depends: base
                , HUnit
-               , doctest >= 0.10 && < 0.17
+               , doctest >= 0.10 && < 0.19
                , parameterized-utils
                , tasty
                , tasty-checklist
