@@ -1,5 +1,9 @@
 # Revision history for tasty-checklist
 
+## 1.0.2.0.DEV -- 2021-07-26
+  * Bump doctest upper constraints (contributed by Felix Yan)
+  * Added missing doctest source
+
 ## 1.0.2.0 -- 2021-07-25
   * Added `Got` specifier for simpler specification of boolean
     `DerivedVal` than using `Val`.
