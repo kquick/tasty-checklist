@@ -1,8 +1,11 @@
 # Revision history for tasty-checklist
 
-## 1.0.2.0.DEV -- 2021-07-26
+## 1.0.3.0 -- 2021-08-13
   * Bump doctest upper constraints (contributed by Felix Yan)
   * Added missing doctest source
+  * Added `Observe` to `DerivedVal` to allow using a user-supplied
+    observation function on failure.
+  * Added `multiLineDiff` helper function
 
 ## 1.0.2.0 -- 2021-07-25
   * Added `Got` specifier for simpler specification of boolean
