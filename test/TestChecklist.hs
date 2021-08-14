@@ -1,13 +1,16 @@
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PatternSynonyms #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Main where
 
 import Data.Parameterized.Context ( pattern Empty, pattern (:>) )
+import qualified Data.Text as T
 import Test.Tasty
+import Test.Tasty.Checklist
 import Test.Tasty.ExpectedFailure
 import Test.Tasty.HUnit
-import Test.Tasty.Checklist
 
 
 main :: IO ()
@@ -112,6 +115,32 @@ main = defaultMain $ testGroup "Checklist testing"
           :> Val "the answer" answer 19
          )
 
+       ----------------------------------------
+
+       , testCase "Compare identical multi-line results" $
+         withChecklist "multi-line" $
+         let result = fmap (T.replace " " " ") soliloquy
+         in result `checkValues`
+            (Empty
+             :> Val "length" length (length soliloquy)
+             :> Val "word count" (length . T.words . T.unlines) 114
+             :> Observe "unchanged" id soliloquy
+              (\expect actual ->
+                 multiLineDiff (T.unlines expect) (T.unlines actual))
+            )
+
+       , expectFailBecause "there are changes" $
+         testCase "Compare changed multi-line results" $
+         withChecklist "multi-line" $
+         let result = fmap (T.replace "  " " ") soliloquy
+         in result `checkValues`
+            (Empty
+             :> Val "length" length (length soliloquy)
+             :> Val "word count" (length . T.words . T.unlines) 113
+             :> Observe "unchanged" id soliloquy
+              (\expect actual ->
+                 multiLineDiff (T.unlines expect) (T.unlines actual))
+            )
        ]
 
 ----------------------------------------------------------------------
@@ -151,3 +180,26 @@ display o = "[[" <> show (answer o) <> "]]"
 
 instance TestShow Opaque where
   testShow = display
+
+
+----------------------------------------------------------------------
+
+soliloquy :: [T.Text]
+soliloquy =
+  [ "To be, or not to be--that is the question:"
+  , "Whether 'tis nobler in the mind to suffer"
+  , "The slings and arrows of outrageous fortune"
+  , "Or to take arms against a sea of troubles"
+  , "And by opposing end them.  To die, to sleep--"
+  , "No more--and by a sleep to say we end"
+  , "The heartache, and the thousand natural shocks"
+  , "That flesh is heir to. 'Tis a consummation"
+  , "Devoutly to be wished.  To die, to sleep--"
+  , "To sleep--perchance to dream: ay, there's the rub,"
+  , "For in that sleep of death what dreams may come"
+  , "When we have shuffled off this mortal coil,"
+  , "Must give us pause.  There's the respect"
+  , "That makes calamity of so long life."
+  ]
+
+instance TestShow [T.Text] where testShow = show . T.unlines
