@@ -46,7 +46,7 @@ module Test.Tasty.Checklist
   -- $checkValues
   -- $setup
   , checkValues
-  , DerivedVal(Val, Got)
+  , DerivedVal(Val, Got, Observe)
   -- * Error reporting
   , CheckResult
   , ChecklistFailures
@@ -155,13 +155,17 @@ withChecklist topMsg t = do
 -- actual (and immediate) fail for the test, but any failing 'check's
 -- appearing before that @assertEqual@ would still have printed.
 
-check :: (CanCheck, TestShow a, MonadIO m)
-      => Text -> (a -> Bool) -> a -> m ()
-check what eval val = do
+checkShow :: (CanCheck, MonadIO m)
+          => (a -> String) -> Text -> (a -> Bool) -> a -> m ()
+checkShow showit what eval val = do
   r <- liftIO $ evaluate (eval val)
   unless r $ do
-    let chk = CheckFailed what $ T.pack $ testShow val
+    let chk = CheckFailed what $ T.pack $ showit val
     liftIO $ modifyIORef ?checker (chk:)
+
+check :: (CanCheck, TestShow a, MonadIO m)
+      => Text -> (a -> Bool) -> a -> m ()
+check = checkShow testShow
 
 
 -- | Sometimes checks are provided in common testing code, often in
@@ -278,6 +282,10 @@ chkValue got _idx = \case
         ti = T.pack (testShow got)
         tv = T.pack (testShow v)
     in check msg (v ==) r
+  (Observe txt fld v observationReport) ->
+    let r = fld got
+        msg = txt <> " observation failure"
+    in checkShow (observationReport v) msg (v ==) r
   (Got txt fld) ->
     let r = fld got
         msg = txt <> " on input <<" <> ti <> ">>"
@@ -305,6 +313,16 @@ data DerivedVal i d where
   -- > Val "what" f True === Got "what" f
   --
   Got :: Text -> (i -> Bool) -> DerivedVal i Bool
+
+  -- | Observe performs the same checking as Val except the TestShow
+  -- information for the actual and expected values are not as useful
+  -- (e.g. they are lengthy, multi-line, or gibberish) so instead this
+  -- allows the specification of a function that will take the
+  -- supplied expected value and the result of the extraction function
+  -- (the actual), respectively, and generate its own description of
+  -- the failure.
+  --
+  Observe :: (Eq d) => Text -> (i -> d) -> d -> (d -> d -> String) -> DerivedVal i d
 
 ----------------------------------------------------------------------
 
