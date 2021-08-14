@@ -10,7 +10,7 @@
   nixConfig.bash-prompt-suffix = "tasty-checklist.env} ";
 
   inputs = {
-    nixpkgs.url = github:nixos/nixpkgs/20.09;
+    nixpkgs.url = github:nixos/nixpkgs/21.05;
     levers = {
       type = "github";
       owner = "kquick";
