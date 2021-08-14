@@ -286,6 +286,9 @@ chkValue got _idx = \case
 
 -- | Each entry in the 'Data.Parameterized.Context.Assignment' list
 -- for 'checkValues' should be one of these 'DerivedVal' values.
+--
+-- The 'i' type parameter is the input type, and the 'd' is the value
+-- derived from that input type.
 
 data DerivedVal i d where
 
@@ -295,7 +298,7 @@ data DerivedVal i d where
   -- not obtained.
   Val :: (TestShow d, Eq d) => Text -> (i -> d) -> d -> DerivedVal i d
 
-  -- | Got allow specification of a description string and an
+  -- | Got allows specification of a description string and an
   -- extraction function.  The 'checkValues' function will add a
   -- Failure if the extraction result is False.
   --
@@ -308,7 +311,7 @@ data DerivedVal i d where
 -- | The 'TestShow' class is defined to provide a way for the various
 -- data objects tested by this module to be displayed when tests fail.
 -- The default 'testShow' will use a 'Show' instance, but this can be
--- overridden if there are alternate ways t o display a particular
+-- overridden if there are alternate ways to display a particular
 -- object (e.g. pretty-printing, etc.)
 
 class TestShow v where
