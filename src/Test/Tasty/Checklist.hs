@@ -53,6 +53,7 @@ module Test.Tasty.Checklist
   -- * Displaying tested values
   , TestShow(testShow)
   , testShowList
+  , multiLineDiff
   )
 where
 
@@ -357,3 +358,37 @@ instance (TestShow a, TestShow b, TestShow c) => TestShow (a,b,c) where
 
 testShowList :: TestShow v => [v] -> String
 testShowList  l = "[ " <> (List.intercalate ", " (testShow <$> l)) <> " ]"
+
+
+-- | The multiLineDiff is another helper function that can be used to
+-- format a line-by-line difference display of two Text
+-- representations.  This is provided as a convenience function to
+-- help format large text regions for easier comparison.
+
+multiLineDiff :: T.Text -> T.Text -> String
+multiLineDiff expected actual =
+  let dl (e,a) = if e == a then db e else de " ↱" e <> "\n    " <> da " ↳" a
+      db b = "|        > " <> b
+      de m e = "|" <> m <> "expect> " <> e
+      da m a = "|" <> m <> "actual> " <> a
+      el = T.lines expected
+      al = T.lines actual
+      addnum :: Int -> T.Text -> T.Text
+      addnum n l = let nt = T.pack (show n)
+                       nl = T.length nt
+                   in T.take (4 - nl) "    " <> nt <> l
+      banner = "MISMATCH between "
+               <> T.pack (show $ length el) <> " expected and "
+               <> T.pack (show $ length al) <> " actual"
+      diffReport = fmap (uncurry addnum) $
+                   zip [1..] $ concat $
+                   -- Highly simplistic "diff" output assumes
+                   -- correlated lines: added or removed lines just
+                   -- cause everything to shown as different from that
+                   -- point forward.
+                   [ fmap dl $ zip el al
+                   , fmap (de "∌ ") $ drop (length al) el
+                   , fmap (da "∹ ") $ drop (length el) al
+                   ]
+      details = banner : diffReport
+  in if expected == actual then "<no difference>" else T.unpack (T.unlines details)
