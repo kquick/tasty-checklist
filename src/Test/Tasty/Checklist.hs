@@ -156,6 +156,10 @@ withChecklist topMsg t = do
 -- actual (and immediate) fail for the test, but any failing 'check's
 -- appearing before that @assertEqual@ would still have printed.
 
+check :: (CanCheck, TestShow a, MonadIO m)
+      => Text -> (a -> Bool) -> a -> m ()
+check = checkShow testShow
+
 checkShow :: (CanCheck, MonadIO m)
           => (a -> String) -> Text -> (a -> Bool) -> a -> m ()
 checkShow showit what eval val = do
@@ -163,10 +167,6 @@ checkShow showit what eval val = do
   unless r $ do
     let chk = CheckFailed what $ T.pack $ showit val
     liftIO $ modifyIORef ?checker (chk:)
-
-check :: (CanCheck, TestShow a, MonadIO m)
-      => Text -> (a -> Bool) -> a -> m ()
-check = checkShow testShow
 
 
 -- | Sometimes checks are provided in common testing code, often in
@@ -296,7 +296,7 @@ chkValue got _idx = \case
 -- | Each entry in the 'Data.Parameterized.Context.Assignment' list
 -- for 'checkValues' should be one of these 'DerivedVal' values.
 --
--- The 'i' type parameter is the input type, and the 'd' is the value
+-- The @i@ type parameter is the input type, and the @d@ is the value
 -- derived from that input type.
 
 data DerivedVal i d where
