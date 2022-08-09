@@ -142,8 +142,8 @@ withChecklist topMsg t = do
 -- odd numbers: FAIL
 --   Exception: ERROR: odds
 --     2 checks failed in this checklist:
---     -Failed check of two is odd with 2
---     -Failed check of 7 + 3 is odd with 10
+--     -Failed check of two is odd with: 2
+--     -Failed check of 7 + 3 is odd with: 10
 -- <BLANKLINE>
 -- 1 out of 1 tests failed (...s)
 -- *** Exception: ExitFailure 1
@@ -255,9 +255,15 @@ discardCheck what = do
 -- someFun result: FAIL
 --   Exception: ERROR: results for someFun
 --     3 checks failed in this checklist:
---     -Failed check of foo on input <<The answer to the universe is 18?>> expected <<42>> but failed with 18
---     -Failed check of shown on input <<The answer to the universe is 18?>> expected <<"The answer to the universe is 42!">> but failed with "The answer to the universe is 18?"
---     -Failed check of double-checking foo on input <<The answer to the universe is 18?>> expected <<42>> but failed with 18
+--     -Failed check of foo on input <<The answer to the universe is 18?>>
+--           expected:    42
+--           failed with: 18
+--     -Failed check of shown on input <<The answer to the universe is 18?>>
+--           expected:    "The answer to the universe is 42!"
+--           failed with: "The answer to the universe is 18?"
+--     -Failed check of double-checking foo on input <<The answer to the universe is 18?>>
+--           expected:    42
+--           failed with: 18
 -- <BLANKLINE>
 -- 1 out of 1 tests failed (...s)
 -- *** Exception: ExitFailure 1
@@ -279,7 +285,9 @@ chkValue :: CanCheck
 chkValue got _idx = \case
   (Val txt fld v) ->
     let r = fld got
-        msg = txt <> " on input <<" <> ti <> ">>\n\texpected:    " <> tv <> "\n\tfailed"
+        msg = txt <> " on input <<" <> ti <> ">>\n"
+              <> "        " <> "expected:    " <> tv <> "\n"
+              <> "        " <> "failed"
         ti = T.pack (testShow got)
         tv = T.pack (testShow v)
     in check msg (v ==) r
