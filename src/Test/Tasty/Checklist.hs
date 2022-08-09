@@ -279,7 +279,7 @@ chkValue :: CanCheck
 chkValue got _idx = \case
   (Val txt fld v) ->
     let r = fld got
-        msg = txt <> " on input <<" <> ti <> ">> expected <<" <> tv <> ">> but failed"
+        msg = txt <> " on input <<" <> ti <> ">>\n\texpected:    " <> tv <> "\n\tfailed"
         ti = T.pack (testShow got)
         tv = T.pack (testShow v)
     in check msg (v ==) r
