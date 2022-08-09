@@ -10,9 +10,10 @@ description:
    a single input value.
 -- bug-reports:
 license:            ISC
+license-file:       LICENSE
 author:             Kevin Quick
 maintainer:         kquick@galois.com
-copyright:          Kevin Quick, 2021
+copyright:          Kevin Quick, 2021-2022
 category:           Testing
 extra-source-files: CHANGELOG.md
 
