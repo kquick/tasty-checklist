@@ -82,7 +82,7 @@ instance Exception ChecklistFailures
 
 instance Show CheckResult where
   show (CheckFailed what msg) =
-    "Failed check of " <> T.unpack what <> " with " <> T.unpack msg
+    "Failed check of " <> T.unpack what <> " with: " <> T.unpack msg
 
 instance Show ChecklistFailures where
   show (ChecklistFailures topMsg fails) =
