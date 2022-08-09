@@ -1,5 +1,10 @@
 # Revision history for tasty-checklist
 
+## 1.0.4.0 -- 2022-08-09
+  * Added explicit LICENSE file
+  * Updated failure messages for clarity and readability
+  * Misc. Haddock documentation updates.
+
 ## 1.0.3.0 -- 2021-08-13
   * Bump doctest upper constraints (contributed by Felix Yan)
   * Added missing doctest source
