@@ -45,7 +45,7 @@ library
   build-depends:    base >= 4.10 && < 5
                   , exceptions >= 0.10 && < 0.11
                   , parameterized-utils >= 2.1.0 && < 2.2
-                  , text >= 1.2 && < 1.3
+                  , text >= 1.2 && < 2.1
 
   
 test-suite checklistTests
