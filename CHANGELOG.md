@@ -1,5 +1,9 @@
 # Revision history for tasty-checklist
 
+## 1.0.4.1 -- 2022-12-26
+
+  * Bump upper bound of doctest to enable GHC 9.4 support.
+
 ## 1.0.4.0 -- 2022-08-09
   * Added explicit LICENSE file
   * Updated failure messages for clarity and readability
