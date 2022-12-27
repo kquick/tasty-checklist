@@ -10,12 +10,20 @@
   nixConfig.bash-prompt-suffix = "tasty-checklist.env} ";
 
   inputs = {
-    nixpkgs.url = github:nixos/nixpkgs/21.05;
+    nixpkgs.url = github:nixos/nixpkgs/22.11;
     levers = {
       type = "github";
       owner = "kquick";
       repo = "nix-levers";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+    hedgehog-src = {
+      url = github:hedgehogqa/haskell-hedgehog?dir=hedgehog;
+      flake = false;
+    };
+    hedgehog-classes-src = {
+      url = github:hedgehogqa/haskell-hedgehog-classes;
+      flake = false;
     };
     tasty-expected-failure-src = {
       url = github:nomeata/tasty-expected-failure;
@@ -25,11 +33,18 @@
       url = github:GaloisInc/parameterized-utils;
       flake = false;
     };
+    tasty-hedgehog-src = {
+      url = github:qfpl/tasty-hedgehog;
+      flake = false;
+    };
   };
 
   outputs = { self, nixpkgs, levers
+            , hedgehog-src
+            , hedgehog-classes-src
             , parameterized-utils-src
             , tasty-expected-failure-src
+            , tasty-hedgehog-src
             }:
      let shellWith = pkgs: adds: drv: drv.overrideAttrs(old:
            { buildInputs = old.buildInputs ++ adds pkgs; });
@@ -73,10 +88,19 @@
           };
           tasty-expected-failure = mkHaskell "tasty-expected-failure"
             tasty-expected-failure-src {
+              inherit tasty-hedgehog;
             };
+          hedgehog = mkHaskell "hedgehog" "${hedgehog-src}/hedgehog" {};
+          hedgehog-classes = mkHaskell "hedgehog-classes" hedgehog-classes-src {
+            inherit hedgehog;
+          };
           parameterized-utils = mkHaskell "parameterized-utils"
             parameterized-utils-src {
+              inherit tasty-hedgehog hedgehog-classes;
             };
+          tasty-hedgehog = mkHaskell "tasty-hedgehog" tasty-hedgehog-src {
+            inherit hedgehog;
+          };
         });
 
       checks = levers.eachSystem (system:

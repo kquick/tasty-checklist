@@ -1,5 +1,39 @@
 {
   "nodes": {
+    "hedgehog-classes-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1671251978,
+        "narHash": "sha256-VEIBeb2x+LyDrzHCTECr96m3MpgHP7Eq2s+XBtOCnJc=",
+        "owner": "hedgehogqa",
+        "repo": "haskell-hedgehog-classes",
+        "rev": "b984777baa4dff37a457e6450e1582c70144733a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hedgehogqa",
+        "repo": "haskell-hedgehog-classes",
+        "type": "github"
+      }
+    },
+    "hedgehog-src": {
+      "flake": false,
+      "locked": {
+        "dir": "hedgehog",
+        "lastModified": 1664878677,
+        "narHash": "sha256-/Y1e99ZCoeOXn7MZAT978wKYse7qG8MuBYmcqZe2Iqs=",
+        "owner": "hedgehogqa",
+        "repo": "haskell-hedgehog",
+        "rev": "a5b482493733dbdd50482c6e65f0ee8f2e156293",
+        "type": "github"
+      },
+      "original": {
+        "dir": "hedgehog",
+        "owner": "hedgehogqa",
+        "repo": "haskell-hedgehog",
+        "type": "github"
+      }
+    },
     "levers": {
       "inputs": {
         "nixpkgs": [
@@ -22,16 +56,16 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1622516815,
-        "narHash": "sha256-ZjBd81a6J3TwtlBr3rHsZspYUwT9OdhDk+a/SgSEf7I=",
+        "lastModified": 1669833724,
+        "narHash": "sha256-/HEZNyGbnQecrgJnfE8d0WC5c1xuPSD2LUpB6YXlg4c=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "7e9b0dff974c89e070da1ad85713ff3c20b0ca97",
+        "rev": "4d2b37a84fad1091b9de401eb450aae66f1a741e",
         "type": "github"
       },
       "original": {
         "owner": "nixos",
-        "ref": "21.05",
+        "ref": "22.11",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -39,11 +73,11 @@
     "parameterized-utils-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1620848407,
-        "narHash": "sha256-ebRTtmALwmwzzwM3FPZWtYPQ6FDjYPhADixn4Z/SGhs=",
+        "lastModified": 1671667886,
+        "narHash": "sha256-YusLzj7WRi4kbGloXQSUWcTPurils4vehSLauMpU1y4=",
         "owner": "GaloisInc",
         "repo": "parameterized-utils",
-        "rev": "13f367bc029de35f9ab4edec2bcd90bc638d30a7",
+        "rev": "4ed9f5c64a6858858cf8545b92ccc73eee2d21f3",
         "type": "github"
       },
       "original": {
@@ -54,10 +88,13 @@
     },
     "root": {
       "inputs": {
+        "hedgehog-classes-src": "hedgehog-classes-src",
+        "hedgehog-src": "hedgehog-src",
         "levers": "levers",
         "nixpkgs": "nixpkgs",
         "parameterized-utils-src": "parameterized-utils-src",
-        "tasty-expected-failure-src": "tasty-expected-failure-src"
+        "tasty-expected-failure-src": "tasty-expected-failure-src",
+        "tasty-hedgehog-src": "tasty-hedgehog-src"
       }
     },
     "tasty-expected-failure-src": {
@@ -73,6 +110,22 @@
       "original": {
         "owner": "nomeata",
         "repo": "tasty-expected-failure",
+        "type": "github"
+      }
+    },
+    "tasty-hedgehog-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1666634002,
+        "narHash": "sha256-dGScU8iTA+2a+czuTpWEc6kKNXxmTni2xRItIWED5gI=",
+        "owner": "qfpl",
+        "repo": "tasty-hedgehog",
+        "rev": "1ade0d8e78c32a724f80d4bc39bdb2a55c5de1c6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "qfpl",
+        "repo": "tasty-hedgehog",
         "type": "github"
       }
     }
