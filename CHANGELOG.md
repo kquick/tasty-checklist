@@ -1,5 +1,9 @@
 # Revision history for tasty-checklist
 
+## 1.0.5.0 -- 2023-01-07
+
+  * Enhanced display of multi-line differences to make whitespace more visible.
+
 ## 1.0.4.1 -- 2022-12-26
 
   * Bump upper bound of doctest to enable GHC 9.4 support.
