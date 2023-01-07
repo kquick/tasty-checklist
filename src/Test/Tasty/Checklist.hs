@@ -379,15 +379,21 @@ multiLineDiff expected actual =
       db b = "|        > " <> b
       de m e = "|" <> m <> "expect> " <> e
       da m a = "|" <> m <> "actual> " <> a
-      el = T.lines expected
-      al = T.lines actual
+      el = visible <$> T.lines expected
+      al = visible <$> T.lines actual
+      visible = T.replace " " "␠"
+                . T.replace "\n" "␤"
+                . T.replace "\t" "␉"
+                . T.replace "\012" "␍"
       addnum :: Int -> T.Text -> T.Text
       addnum n l = let nt = T.pack (show n)
                        nl = T.length nt
                    in T.take (4 - nl) "    " <> nt <> l
+      ll = T.pack . show . length
+      tl = T.pack . show . T.length
       banner = "MISMATCH between "
-               <> T.pack (show $ length el) <> " expected and "
-               <> T.pack (show $ length al) <> " actual"
+               <> ll el <> "l/" <> tl expected <> "c expected and "
+               <> ll al <> "l/" <> tl actual <> "c actual"
       diffReport = fmap (uncurry addnum) $
                    zip [1..] $ concat $
                    -- Highly simplistic "diff" output assumes
@@ -398,5 +404,16 @@ multiLineDiff expected actual =
                    , fmap (de "∌ ") $ drop (length al) el
                    , fmap (da "∹ ") $ drop (length el) al
                    ]
+                   -- n.b. T.lines seems to consume trailing whitespace before
+                   -- newlines as well.  This will show any of this whitespace
+                   -- difference on the last line, but not for other lines with
+                   -- whitespace.
+                   <> if el == al
+                      then let maxlen = max (T.length expected) (T.length actual)
+                               end x = T.drop (maxlen - 5) x
+                           in [ [ de "∌ ending " $ visible $ end expected ]
+                              , [ da "∹ ending " $ visible $ end actual ]
+                              ]
+                      else mempty
       details = banner : diffReport
   in if expected == actual then "<no difference>" else T.unpack (T.unlines details)
