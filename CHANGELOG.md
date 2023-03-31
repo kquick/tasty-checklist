@@ -1,5 +1,10 @@
 # Revision history for tasty-checklist
 
+## 1.0.5.1 -- 2023-03-31
+
+  * Remove constraint bounds for GHC builtin libraries.
+  * Bump doctest constraints to allow 0.21 release series.
+
 ## 1.0.5.0 -- 2023-01-07
 
   * Enhanced display of multi-line differences to make whitespace more visible.
