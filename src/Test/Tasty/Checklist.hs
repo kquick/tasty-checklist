@@ -76,17 +76,28 @@ data ChecklistFailures = ChecklistFailures Text [CheckResult]
 
 -- | The internal 'CheckResult' captures the failure information for a check
 
-data CheckResult = CheckFailed CheckName FailureMessage
+data CheckResult = CheckFailed CheckName (Maybe InputAsText) FailureMessage
+                 | CheckMessage Text
 
 newtype CheckName = CheckName { checkName :: Text }
+newtype InputAsText = InputAsText { inputAsText :: Text }
 newtype FailureMessage = FailureMessage { failureMessage :: Text }
 
 instance Exception ChecklistFailures
 
 instance Show CheckResult where
-  show (CheckFailed what msg) =
-    "Failed check of " <> T.unpack (checkName what)
-    <> " with: " <> T.unpack (failureMessage msg)
+  show (CheckFailed what onValue msg) =
+    let chknm = if length (T.lines (checkName what)) > 1
+                then "check: " <> T.unpack (checkName what)
+                else "check '" <> T.unpack (checkName what) <> "'"
+        chkmsg = if T.null (failureMessage msg)
+                 then ""
+                 else " with: " <> T.unpack (failureMessage msg)
+                      -- n.b. msg might be carefully crafted to preceed chkval
+        chkval = case onValue of
+          Nothing -> ""
+          Just i -> "\n        using:       " <> T.unpack (inputAsText i)
+    in "Failed " <> chknm <> chkmsg <> chkval
 
 instance Show ChecklistFailures where
   show (ChecklistFailures topMsg fails) =
@@ -146,8 +157,8 @@ withChecklist topMsg t = do
 -- odd numbers: FAIL
 --   Exception: ERROR: odds
 --     2 checks failed in this checklist:
---     -Failed check of two is odd with: 2
---     -Failed check of 7 + 3 is odd with: 10
+--     -Failed check 'two is odd' with: 2
+--     -Failed check '7 + 3 is odd' with: 10
 -- <BLANKLINE>
 -- 1 out of 1 tests failed (...s)
 -- *** Exception: ExitFailure 1
@@ -162,14 +173,17 @@ withChecklist topMsg t = do
 
 check :: (CanCheck, TestShow a, MonadIO m)
       => Text -> (a -> Bool) -> a -> m ()
-check = checkShow testShow
+check = checkShow testShow Nothing
 
 checkShow :: (CanCheck, MonadIO m)
-          => (a -> String) -> Text -> (a -> Bool) -> a -> m ()
-checkShow showit what eval val = do
+          => (a -> String)
+          -> Maybe InputAsText
+          -> Text -> (a -> Bool) -> a -> m ()
+checkShow showit failInput what eval val = do
   r <- liftIO $ evaluate (eval val)
   unless r $ do
-    let chk = CheckFailed (CheckName what) $ FailureMessage $ T.pack $ showit val
+    let failtxt = FailureMessage $ T.pack $ showit val
+    let chk = CheckFailed (CheckName what) failInput failtxt
     liftIO $ modifyIORef ?checker (chk:)
 
 
@@ -186,7 +200,7 @@ checkShow showit what eval val = do
 
 discardCheck :: (CanCheck, MonadIO m) => Text -> m ()
 discardCheck what = do
-  let isCheck n (CheckFailed n' _) = n == checkName n'
+  let isCheck n (CheckFailed n' _ _) = n == checkName n'
   liftIO $ modifyIORef ?checker (filter (not . isCheck what))
 
 ----------------------------------------------------------------------
@@ -259,15 +273,18 @@ discardCheck what = do
 -- someFun result: FAIL
 --   Exception: ERROR: results for someFun
 --     3 checks failed in this checklist:
---     -Failed check of foo on input <<The answer to the universe is 18?>>
+--     -Failed check: foo
 --           expected:    42
 --           failed with: 18
---     -Failed check of shown on input <<The answer to the universe is 18?>>
+--           using:       The answer to the universe is 18?
+--     -Failed check: shown
 --           expected:    "The answer to the universe is 42!"
 --           failed with: "The answer to the universe is 18?"
---     -Failed check of double-checking foo on input <<The answer to the universe is 18?>>
+--           using:       The answer to the universe is 18?
+--     -Failed check: double-checking foo
 --           expected:    42
 --           failed with: 18
+--           using:       The answer to the universe is 18?
 -- <BLANKLINE>
 -- 1 out of 1 tests failed (...s)
 -- *** Exception: ExitFailure 1
@@ -286,24 +303,20 @@ checkValues got expF =
 chkValue :: CanCheck
          => TestShow dType
          => dType -> Ctx.Index idx valType -> DerivedVal dType valType -> IO ()
-chkValue got _idx = \case
-  (Val txt fld v) ->
-    let r = fld got
-        msg = txt <> " on input <<" <> ti <> ">>\n"
-              <> "        " <> "expected:    " <> tv <> "\n"
-              <> "        " <> "failed"
-        ti = T.pack (testShow got)
-        tv = T.pack (testShow v)
-    in check msg (v ==) r
-  (Observe txt fld v observationReport) ->
-    let r = fld got
-        msg = txt <> " observation failure"
-    in checkShow (observationReport v) msg (v ==) r
-  (Got txt fld) ->
-    let r = fld got
-        msg = txt <> " on input <<" <> ti <> ">>"
-        ti = T.pack (testShow got)
-    in check msg (True ==) r
+chkValue got _idx =
+  let ti = Just $ InputAsText $ T.pack $ testShow got
+  in \case
+    (Val txt fld v) ->
+      let msg = txt
+                <> "\n"
+                <> "        " <> "expected:    " <> tv <> "\n"
+                <> "        " <> "failed"
+          tv = T.pack (testShow v)
+      in checkShow testShow ti msg (v ==) $ fld got
+    (Observe txt fld v observationReport) ->
+      let msg = txt <> " observation failure"
+      in checkShow (observationReport v) ti msg (v ==) $ fld got
+    (Got txt fld) -> checkShow testShow ti txt id $ fld got
 
 -- | Each entry in the 'Data.Parameterized.Context.Assignment' list
 -- for 'checkValues' should be one of these 'DerivedVal' values.
