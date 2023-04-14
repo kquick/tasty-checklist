@@ -76,13 +76,17 @@ data ChecklistFailures = ChecklistFailures Text [CheckResult]
 
 -- | The internal 'CheckResult' captures the failure information for a check
 
-data CheckResult = CheckFailed Text Text  -- check name from user, fail message
+data CheckResult = CheckFailed CheckName FailureMessage
+
+newtype CheckName = CheckName { checkName :: Text }
+newtype FailureMessage = FailureMessage { failureMessage :: Text }
 
 instance Exception ChecklistFailures
 
 instance Show CheckResult where
   show (CheckFailed what msg) =
-    "Failed check of " <> T.unpack what <> " with: " <> T.unpack msg
+    "Failed check of " <> T.unpack (checkName what)
+    <> " with: " <> T.unpack (failureMessage msg)
 
 instance Show ChecklistFailures where
   show (ChecklistFailures topMsg fails) =
@@ -165,7 +169,7 @@ checkShow :: (CanCheck, MonadIO m)
 checkShow showit what eval val = do
   r <- liftIO $ evaluate (eval val)
   unless r $ do
-    let chk = CheckFailed what $ T.pack $ showit val
+    let chk = CheckFailed (CheckName what) $ FailureMessage $ T.pack $ showit val
     liftIO $ modifyIORef ?checker (chk:)
 
 
@@ -182,7 +186,7 @@ checkShow showit what eval val = do
 
 discardCheck :: (CanCheck, MonadIO m) => Text -> m ()
 discardCheck what = do
-  let isCheck n (CheckFailed n' _) = n == n'
+  let isCheck n (CheckFailed n' _) = n == checkName n'
   liftIO $ modifyIORef ?checker (filter (not . isCheck what))
 
 ----------------------------------------------------------------------
