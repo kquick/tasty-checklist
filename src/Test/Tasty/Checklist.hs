@@ -63,6 +63,7 @@ import           Control.Monad.Catch
 import           Control.Monad.IO.Class ( MonadIO, liftIO )
 import           Data.IORef
 import qualified Data.List as List
+import qualified Data.Map as Map
 import qualified Data.Parameterized.Context as Ctx
 import           Data.Text ( Text )
 import qualified Data.Text as T
@@ -80,7 +81,7 @@ data CheckResult = CheckFailed CheckName (Maybe InputAsText) FailureMessage
                  | CheckMessage Text
 
 newtype CheckName = CheckName { checkName :: Text }
-newtype InputAsText = InputAsText { inputAsText :: Text }
+newtype InputAsText = InputAsText { inputAsText :: Text } deriving (Eq, Ord)
 newtype FailureMessage = FailureMessage { failureMessage :: Text }
 
 instance Exception ChecklistFailures
@@ -98,12 +99,17 @@ instance Show CheckResult where
           Nothing -> ""
           Just i -> "\n        using:       " <> T.unpack (inputAsText i)
     in "Failed " <> chknm <> chkmsg <> chkval
+  show (CheckMessage txt) = "-- " <> T.unpack txt
 
 instance Show ChecklistFailures where
   show (ChecklistFailures topMsg fails) =
-    "ERROR: " <> T.unpack topMsg <> "\n  " <>
-    show (length fails) <> " checks failed in this checklist:\n  -" <>
-    List.intercalate "\n  -" (show <$> fails)
+    let isMessage = \case
+          CheckMessage _ -> True
+          _ -> False
+        checkCnt = length $ filter (not . isMessage) fails
+    in "ERROR: " <> T.unpack topMsg <> "\n  "
+       <> show checkCnt <> " checks failed in this checklist:\n  -"
+       <> List.intercalate "\n  -" (show <$> fails)
 
 -- | A convenient Constraint to apply to functions that will perform
 -- checks (i.e. call 'check' one or more times)
@@ -201,6 +207,7 @@ checkShow showit failInput what eval val = do
 discardCheck :: (CanCheck, MonadIO m) => Text -> m ()
 discardCheck what = do
   let isCheck n (CheckFailed n' _ _) = n == checkName n'
+      isCheck _ (CheckMessage _) = False
   liftIO $ modifyIORef ?checker (filter (not . isCheck what))
 
 ----------------------------------------------------------------------
@@ -273,18 +280,16 @@ discardCheck what = do
 -- someFun result: FAIL
 --   Exception: ERROR: results for someFun
 --     3 checks failed in this checklist:
+--     --- Input for below: The answer to the universe is 18?
 --     -Failed check: foo
 --           expected:    42
 --           failed with: 18
---           using:       The answer to the universe is 18?
 --     -Failed check: shown
 --           expected:    "The answer to the universe is 42!"
 --           failed with: "The answer to the universe is 18?"
---           using:       The answer to the universe is 18?
 --     -Failed check: double-checking foo
 --           expected:    42
 --           failed with: 18
---           using:       The answer to the universe is 18?
 -- <BLANKLINE>
 -- 1 out of 1 tests failed (...s)
 -- *** Exception: ExitFailure 1
@@ -296,8 +301,29 @@ discardCheck what = do
 checkValues :: CanCheck
             => TestShow dType
             => dType -> Ctx.Assignment (DerivedVal dType) idx ->  IO ()
-checkValues got expF =
+checkValues got expF = do
   join $ evaluate <$> Ctx.traverseWithIndex_ (chkValue got) expF
+  -- All the checks are evaluating against the same 'got' value; normally a check
+  -- reports the value that caused it to fail but that could get repetitious.
+  -- This groups check failures by their input and removes the input from each
+  -- checkfailure, instead starting the group with a CheckMessage describing the
+  -- input for that entire group.
+  let groupByInp chks =
+        let gmap = foldr insByInp mempty chks
+            insByInp = \case
+              c@(CheckFailed _ mbi _) -> Map.insertWith (<>) mbi [c]
+              CheckMessage _ -> id -- regrouping, ignore any previous groups
+            addGroup (mbi,gchks) =
+              let newChks = dropInput <$> gchks
+                  dropInput (CheckFailed nm _ fmsg) = CheckFailed nm Nothing fmsg
+                  dropInput i@(CheckMessage _) = i
+                  grpTitle = maybe "<no input identified>"
+                             (("Input for below: " <>) . inputAsText)
+                             mbi
+              in (<> (newChks <> [CheckMessage grpTitle]))
+        in foldr addGroup mempty $ Map.toList gmap
+
+  liftIO $ modifyIORef ?checker groupByInp
 
 
 chkValue :: CanCheck
