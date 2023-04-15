@@ -315,7 +315,11 @@ checkValues got expF = do
               CheckMessage _ -> id -- regrouping, ignore any previous groups
             addGroup (mbi,gchks) =
               let newChks = dropInput <$> gchks
-                  dropInput (CheckFailed nm _ fmsg) = CheckFailed nm Nothing fmsg
+                  dropInput (CheckFailed nm _ fmsg) =
+                    if Just (failureMessage fmsg) == (inputAsText <$> mbi)
+                    then CheckFailed nm Nothing
+                         $ FailureMessage "<< ^^ above input ^^ >>"
+                    else CheckFailed nm Nothing fmsg
                   dropInput i@(CheckMessage _) = i
                   grpTitle = maybe "<no input identified>"
                              (("Input for below: " <>) . inputAsText)
