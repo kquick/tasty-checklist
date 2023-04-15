@@ -1,6 +1,6 @@
 cabal-version:      2.2
 name:               tasty-checklist
-version:            1.0.5.1
+version:            1.0.6.0
 synopsis:           Check multiple items during a tasty test
 description:
    Allows the test to check a number of items during a test and
@@ -13,7 +13,7 @@ license:            ISC
 license-file:       LICENSE
 author:             Kevin Quick
 maintainer:         kquick@galois.com
-copyright:          Kevin Quick, 2021-2023
+copyright:          Kevin Quick
 category:           Testing
 extra-source-files: CHANGELOG.md
 
