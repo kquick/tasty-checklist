@@ -1,6 +1,6 @@
 cabal-version:      2.2
 name:               tasty-checklist
-version:            1.0.6.0
+version:            1.0.7.0
 synopsis:           Check multiple items during a tasty test
 description:
    Allows the test to check a number of items during a test and
@@ -71,7 +71,7 @@ test-suite checklistDocTests
   main-is:          DocTestChecklist.hs
   build-depends: base
                , HUnit
-               , doctest >= 0.10 && < 0.22
+               , doctest >= 0.10 && < 0.25
                , parameterized-utils
                , tasty
                , tasty-checklist

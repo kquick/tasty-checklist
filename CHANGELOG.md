@@ -1,6 +1,11 @@
 # Revision history for tasty-checklist
 
+## 1.0.7.0 -- 2025-10-24
+
+  * Update constraints and flake to support GHC 8.10 -- GHC 9.12.
+
 ## 1.0.6.0 -- 2023-04-14
+
   * Update output formatting to show common input trigger only once for a group
     of check failures rather than on each failure.
   * Small formatting updates to check failure messages.

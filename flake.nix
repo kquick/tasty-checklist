@@ -10,23 +10,16 @@
   nixConfig.bash-prompt-suffix = "tasty-checklist.env} ";
 
   inputs = {
-    nixpkgs.url = github:nixos/nixpkgs/22.11;
+    nixpkgs.url = github:nixos/nixpkgs/nixpkgs-unstable;
+    nixpkgs2411.url = github:nixos/nixpkgs/24.11;  # GHC8.10--GHC9.12
     levers = {
       type = "github";
       owner = "kquick";
       repo = "nix-levers";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    hedgehog-src = {
-      url = github:hedgehogqa/haskell-hedgehog?dir=hedgehog;
-      flake = false;
-    };
     hedgehog-classes-src = {
       url = github:hedgehogqa/haskell-hedgehog-classes;
-      flake = false;
-    };
-    tasty-expected-failure-src = {
-      url = github:nomeata/tasty-expected-failure;
       flake = false;
     };
     parameterized-utils-src = {
@@ -39,11 +32,9 @@
     };
   };
 
-  outputs = { self, nixpkgs, levers
-            , hedgehog-src
+  outputs = { self, nixpkgs, nixpkgs2411, levers
             , hedgehog-classes-src
             , parameterized-utils-src
-            , tasty-expected-failure-src
             , tasty-hedgehog-src
             }:
      let shellWith = pkgs: adds: drv: drv.overrideAttrs(old:
@@ -78,43 +69,64 @@
             ) ;
 
       packages = levers.eachSystem (system:
-        let mkHaskell = levers.mkHaskellPkg {
-              inherit nixpkgs system;
-            };
+        let nixpkgs_list = [
+              nixpkgs2411
+              nixpkgs
+            ];
+            mkHaskell = name: src: overDrvOrArgs:
+              levers.mkHaskellPkgs {
+                inherit system;
+              } nixpkgs_list name src overDrvOrArgs;
             pkgs = import nixpkgs { inherit system; };
+            haskellAdj = drv:
+              with (pkgs.haskell).lib;
+              dontHaddock (
+                dontCheck (
+                  dontBenchmark (
+                    # disableLibraryProfiling (
+                    #   disableExecutableProfiling
+                        drv)
+                    # )
+                )
+              );
+            wrap = levers.pkg_wrapper system pkgs;
         in rec {
+          default = tasty-checklist;
+          TESTS = wrap "tasty-checklist-TESTS" [
+            tasty-checklist_test         # current version
+            tasty-checklist_test.ghc810  # minimum version
+            tasty-checklist_test.ghc912  # maximum version
+          ];
+          DOC = wrap "tasty-checklist-DOC" [
+            tasty-checklist_doc         # current version
+            tasty-checklist_doc.ghc810  # minimum version
+            tasty-checklist_doc.ghc912  # maximum version
+          ];
           tasty-checklist = mkHaskell "tasty-checklist" self {
-            inherit parameterized-utils tasty-expected-failure;
+            inherit parameterized-utils;
+            adjustDrv = args: haskellAdj;
           };
-          tasty-expected-failure = mkHaskell "tasty-expected-failure"
-            tasty-expected-failure-src {
-              inherit tasty-hedgehog;
-            };
-          hedgehog = mkHaskell "hedgehog" "${hedgehog-src}/hedgehog" {};
-          hedgehog-classes = mkHaskell "hedgehog-classes" hedgehog-classes-src {
-            inherit hedgehog;
+          tasty-checklist_test = mkHaskell "tasty-checklist" self {
+            inherit parameterized-utils;
+            adjustDrv = args: drv:
+              with pkgs.haskell.lib; doBenchmark (doCheck (haskellAdj drv));
           };
+          tasty-checklist_doc = mkHaskell "tasty-checklist" self {
+            inherit parameterized-utils;
+            adjustDrv = args: drv:
+              with pkgs.haskell.lib.doHaddock; (haskellAdj drv);
+          };
+          hedgehog-classes = mkHaskell "hedgehog-classes" hedgehog-classes-src {};
           parameterized-utils = mkHaskell "parameterized-utils"
             parameterized-utils-src {
-              inherit tasty-hedgehog hedgehog-classes;
+              inherit
+                tasty-hedgehog
+                hedgehog-classes;
             };
-          tasty-hedgehog = mkHaskell "tasty-hedgehog" tasty-hedgehog-src {
-            inherit hedgehog;
-          };
+          tasty-hedgehog = mkHaskell "tasty-hedgehog" tasty-hedgehog-src {};
         });
 
       checks = levers.eachSystem (system:
-        let mkHaskell = levers.mkHaskellPkg {
-              inherit nixpkgs system;
-            };
-            pkgs = import nixpkgs { inherit system; };
-        in {
-          tasty-checklist-check = mkHaskell "tasty-checklist-check" self {
-            adjustDrv = args: drv: pkgs.haskell.lib.doCheck drv;
-            parameterized-utils = self.packages.${system}.parameterized-utils;
-            tasty-expected-failure = self.packages.${system}.tasty-expected-failure;
-          };
-        });
-
+        self.packages."${system}".TESTS);
     };
 }
