@@ -97,8 +97,15 @@ instance Show CheckResult where
                       -- n.b. msg might be carefully crafted to preceed chkval
         chkval = case onValue of
           Nothing -> ""
-          Just i -> "\n        using:       " <> T.unpack (inputAsText i)
-    in "Failed " <> chknm <> chkmsg <> chkval
+          Just i -> "\n" <> indent <> "using:"
+                    <> indent <> T.unpack (inputAsText i)
+    in if or [ length chknm > 100
+             , length chkmsg > 100
+             , length chkval > 100
+             ]
+       then replicate 50 '#' <> "\n\n" <> indent
+            <> "Failed " <> chknm <> chkmsg <> chkval
+       else "Failed " <> chknm <> chkmsg <> chkval
   show (CheckMessage txt) = "-- " <> T.unpack txt
 
 instance Show ChecklistFailures where
@@ -110,6 +117,12 @@ instance Show ChecklistFailures where
     in "ERROR: " <> T.unpack topMsg <> "\n  "
        <> show checkCnt <> " checks failed in this checklist:\n  -"
        <> List.intercalate "\n  -" (show <$> fails)
+
+indent :: String
+indent = "        "
+
+indenT :: Text
+indenT = T.pack indent
 
 -- | A convenient Constraint to apply to functions that will perform
 -- checks (i.e. call 'check' one or more times)
@@ -282,14 +295,14 @@ discardCheck what = do
 --     3 checks failed in this checklist:
 --     --- Input for below: The answer to the universe is 18?
 --     -Failed check: foo
---           expected:    42
---           failed with: 18
+--             expected:    42
+--             failed with: 18
 --     -Failed check: shown
---           expected:    "The answer to the universe is 42!"
---           failed with: "The answer to the universe is 18?"
+--             expected:    "The answer to the universe is 42!"
+--             failed with: "The answer to the universe is 18?"
 --     -Failed check: double-checking foo
---           expected:    42
---           failed with: 18
+--             expected:    42
+--             failed with: 18
 -- <BLANKLINE>
 -- 1 out of 1 tests failed (...s)
 -- *** Exception: ExitFailure 1
@@ -321,8 +334,11 @@ checkValues got expF = do
                          $ FailureMessage "<< ^^ above input ^^ >>"
                     else CheckFailed nm Nothing fmsg
                   dropInput i@(CheckMessage _) = i
+                  dispInput i = if T.length (inputAsText i) > 100
+                                then inputAsText i <> "\n\n"
+                                else inputAsText i
                   grpTitle = maybe "<no input identified>"
-                             (("Input for below: " <>) . inputAsText)
+                             (("Input for below: " <>) . dispInput)
                              mbi
               in (<> (newChks <> [CheckMessage grpTitle]))
         in foldr addGroup mempty $ Map.toList gmap
@@ -337,10 +353,12 @@ chkValue got _idx =
   let ti = Just $ InputAsText $ T.pack $ testShow got
   in \case
     (Val txt fld v) ->
-      let msg = txt
-                <> "\n"
-                <> "        " <> "expected:    " <> tv <> "\n"
-                <> "        " <> "failed"
+      let msg =
+            if T.length txt > 100
+            then txt <> "\n\n" <> expline <> "\n\n" <> failedpfx
+            else txt <> "\n" <> expline <> failedpfx
+          expline = indenT <> "  expected:    " <> tv <> "\n"
+          failedpfx = indenT <> "  failed"
           tv = T.pack (testShow v)
       in checkShow testShow ti msg (v ==) $ fld got
     (Observe txt fld v observationReport) ->
