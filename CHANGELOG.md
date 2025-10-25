@@ -1,5 +1,9 @@
 # Revision history for tasty-checklist
 
+## 1.0.8.0 -- 2025-10-25
+
+  * Limit diff output to 100 lines and align output.
+
 ## 1.0.7.0 -- 2025-10-24
 
   * Update constraints and flake to support GHC 8.10 -- GHC 9.12.
