@@ -93,7 +93,7 @@
               );
             wrap = levers.pkg_wrapper system pkgs;
         in rec {
-          default = tasty-checklist;
+          default = tasty-checklist.ghc910;
           TESTS = wrap "tasty-checklist-TESTS" [
             tasty-checklist_test         # current version
             tasty-checklist_test.ghc810  # minimum version
