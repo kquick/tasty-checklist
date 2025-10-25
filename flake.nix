@@ -65,7 +65,9 @@
             (s:
               let pkgs = import nixpkgs { system=s; };
                   names = builtins.attrNames (self.packages.${s});
-              in pkgs.lib.genAttrs names (oneshell s)
+                  shells = pkgs.lib.genAttrs names (oneshell s);
+              in shells
+                 // { default = devShells.${s}.tasty-checklist_test.default; }
             ) ;
 
       packages = levers.eachSystem (system:
