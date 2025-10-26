@@ -23,11 +23,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1761402116,
-        "narHash": "sha256-G80oQjchjBWDVV3ZINAoHokY9WnKgSlACwNrfiBze9A=",
+        "lastModified": 1761496949,
+        "narHash": "sha256-RhpUM0k4hhH+eLYweRksnwBbbSMFAvZjdjjfJ/g8LPg=",
         "owner": "kquick",
         "repo": "nix-levers",
-        "rev": "8822b2e6739f03243a811ef7f5e8ad02522167ea",
+        "rev": "dbbd7333c0e96e3761e2e7dcfd4b170ed4e66dc4",
         "type": "github"
       },
       "original": {
@@ -38,32 +38,15 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1761349956,
-        "narHash": "sha256-tH3wHnOJms+U4k/rK2Nn1RfBrhffX92jLP/2VndSn0w=",
+        "lastModified": 1761496374,
+        "narHash": "sha256-pwGopD2XaBEs+uSFKsqDlo2L+zYa7nc4IWkLzvu8eFo=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "02f2cb8e0feb4596d20cc52fda73ccee960e3538",
+        "rev": "122141d3bb780d17da2c24cae8c92a27eab83840",
         "type": "github"
       },
       "original": {
         "owner": "nixos",
-        "ref": "nixpkgs-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs2411": {
-      "locked": {
-        "lastModified": 1731603435,
-        "narHash": "sha256-CqCX4JG7UiHvkrBTpYC3wcEurvbtTADLbo3Ns2CEoL8=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "8b27c1239e5c421a2bbc2c65d52e4a6fbf2ff296",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "ref": "24.11",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -89,7 +72,6 @@
         "hedgehog-classes-src": "hedgehog-classes-src",
         "levers": "levers",
         "nixpkgs": "nixpkgs",
-        "nixpkgs2411": "nixpkgs2411",
         "parameterized-utils-src": "parameterized-utils-src",
         "tasty-hedgehog-src": "tasty-hedgehog-src"
       }
