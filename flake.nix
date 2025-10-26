@@ -10,31 +10,21 @@
   nixConfig.bash-prompt-suffix = "tasty-checklist.env} ";
 
   inputs = {
-    nixpkgs.url = github:nixos/nixpkgs;
+    nixpkgs.url = github:nixos/nixpkgs/nixpkgs-unstable;
     levers = {
       type = "github";
       owner = "kquick";
       repo = "nix-levers";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    hedgehog-classes-src = {
-      url = github:hedgehogqa/haskell-hedgehog-classes;
-      flake = false;
-    };
     parameterized-utils-src = {
       url = github:GaloisInc/parameterized-utils;
-      flake = false;
-    };
-    tasty-hedgehog-src = {
-      url = github:qfpl/tasty-hedgehog;
       flake = false;
     };
   };
 
   outputs = { self, nixpkgs, levers
-            , hedgehog-classes-src
             , parameterized-utils-src
-            , tasty-hedgehog-src
             }:
     rec
     {
@@ -53,14 +43,9 @@
           tasty-checklist = mkHaskell "tasty-checklist" self {
             inherit parameterized-utils;
           };
-          hedgehog-classes = mkHaskell "hedgehog-classes" hedgehog-classes-src {};
           parameterized-utils = mkHaskell "parameterized-utils"
             parameterized-utils-src {
-              inherit
-                tasty-hedgehog
-                hedgehog-classes;
             };
-          tasty-hedgehog = mkHaskell "tasty-hedgehog" tasty-hedgehog-src {};
         });
     };
 }
