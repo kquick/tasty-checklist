@@ -178,6 +178,7 @@ withChecklist topMsg t = do
 --     2 checks failed in this checklist:
 --     -Failed check 'two is odd' with: 2
 --     -Failed check '7 + 3 is odd' with: 10
+-- ...
 -- <BLANKLINE>
 -- 1 out of 1 tests failed (...s)
 -- *** Exception: ExitFailure 1
@@ -303,6 +304,7 @@ discardCheck what = do
 --     -Failed check: double-checking foo
 --             expected:    42
 --             failed with: 18
+-- ...
 -- <BLANKLINE>
 -- 1 out of 1 tests failed (...s)
 -- *** Exception: ExitFailure 1
