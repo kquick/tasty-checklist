@@ -20,6 +20,22 @@
         "type": "github"
       }
     },
+    "microlens-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1758506353,
+        "narHash": "sha256-m4qQXZcHffx1OW1a6JVX3d/XzfSL9cFcTUR+O8yyFYo=",
+        "owner": "monadfix",
+        "repo": "microlens",
+        "rev": "7d509d465c54dba45b182f9c60452b3b3aa71d1a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "monadfix",
+        "repo": "microlens",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1767364772,
@@ -39,16 +55,15 @@
     "parameterized-utils-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1763983533,
-        "narHash": "sha256-2wsBOle5zKo7SHyYJupVFtbWk0V4xbLgU21HuttJ7O8=",
+        "lastModified": 1776685697,
+        "narHash": "sha256-1VnTKp6R8ubRrWx3g1zZsds3beDjICbhJ/3VlrbjbhQ=",
         "owner": "GaloisInc",
         "repo": "parameterized-utils",
-        "rev": "6cd1f32c67f973e74576f1d15eeeb2a344cd9ece",
+        "rev": "84825020cfa306323d2182e6952068baf89a07cf",
         "type": "github"
       },
       "original": {
         "owner": "GaloisInc",
-        "ref": "6cd1f32",
         "repo": "parameterized-utils",
         "type": "github"
       }
@@ -56,6 +71,7 @@
     "root": {
       "inputs": {
         "levers": "levers",
+        "microlens-src": "microlens-src",
         "nixpkgs": "nixpkgs",
         "parameterized-utils-src": "parameterized-utils-src"
       }

@@ -18,19 +18,18 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     parameterized-utils-src = {
-      # Lock to revision 6cd1f32 because the subsequent changes replace lens with
-      # microlens-pro, and the latter was only introduced in Feb 2024 (circa GHC
-      # 9.8.3), so it's not available for older nixpkgs configurations.  As of
-      # 2025 Dec, there are no functional changes in parameterized-utils, just
-      # dependency changes, and there is intent to remove the microlens-pro
-      # dependency from parameterized-utils, so freeze this until that occurs.
-      url = "github:GaloisInc/parameterized-utils/6cd1f32";
+      url = "github:GaloisInc/parameterized-utils";
+      flake = false;
+    };
+    microlens-src = {
+      url = "github:monadfix/microlens";
       flake = false;
     };
   };
 
   outputs = { self, nixpkgs, levers
             , parameterized-utils-src
+            , microlens-src
             }:
     rec
     {
@@ -51,7 +50,9 @@
           };
           parameterized-utils = mkHaskell "parameterized-utils"
             parameterized-utils-src {
-            };
+            inherit microlens;
+          };
+          microlens = mkHaskell "microlens" "${microlens-src}/microlens" { };
         });
     };
 }
