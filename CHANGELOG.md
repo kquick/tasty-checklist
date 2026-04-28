@@ -1,5 +1,9 @@
 # Revision history for tasty-checklist
 
+## 1.0.9.0 -- 2026-04-28
+
+  * Update support for parameterized-utils to support version 2.3.
+
 ## 1.0.8.0 -- 2025-10-25
 
   * Limit diff output to 100 lines and align output.
