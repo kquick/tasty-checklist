@@ -31,7 +31,7 @@ dev
    nixbuild
      Uses nix to build with current GHC versions
        in dir = {TopDir}
-       exec = nix build --no-link $(for X in 910 912 ; do echo ".#tasty-checklist.ghc$X"; done)
+       exec = nix build --no-link $(for X in 910 912 914 ; do echo ".#tasty-checklist.ghc$X"; done)
    nixbuild:all =
      Uses nix to build with all supported GHC versions =
        in dir = {TopDir}
