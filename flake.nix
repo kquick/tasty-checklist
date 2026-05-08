@@ -37,7 +37,8 @@
         { inherit nixpkgs;
           flake = self;
           defaultPkg = "tasty-checklist";
-          # additionalPackages = pkgs.haskell.packages.ghc8107.profiteur
+          additionalPackages = pkgs: [ pkgs.cabal-install ];
+          ghcvers = s: ["ghc912"];
         };
 
       packages = levers.eachSystem (system:
