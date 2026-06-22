@@ -51,7 +51,22 @@
           };
           parameterized-utils = mkHaskell "parameterized-utils"
             parameterized-utils-src {
-            inherit microlens;
+              inherit microlens;
+              adjustDrv = args: drv:
+                let jailBreak_hedgehog_classes = i:
+                      # Under hedgehog-classes has upper bounds that preclude
+                      # GHC9.14; avoid those constraints until hedgehog-classes
+                      # is updated.
+                      if builtins.match "ghc91[^02]" args.ghcver != null
+                         && i != null
+                         && i.pname or "no-pname" == "hedgehog-classes"
+                      then pkgs.haskell.lib.doJailbreak i
+                      else i;
+                in drv.overrideAttrs (old:
+                  {
+                    buildInputs = builtins.map jailBreak_hedgehog_classes
+                      old.buildInputs;
+                  });
           };
           microlens = mkHaskell "microlens" "${microlens-src}/microlens" { };
         });
