@@ -1,5 +1,9 @@
 # Revision history for tasty-checklist
 
+## 1.0.10.0 -- 2926-06-22
+
+  * Fix to support GHC9.14 (doctests updated for new exception output format).
+
 ## 1.0.9.0 -- 2026-04-28
 
   * Update support for parameterized-utils to support version 2.3.
