@@ -174,7 +174,8 @@ withChecklist topMsg t = do
 -- >>>  check "7 is odd" odd (7 :: Int)
 -- >>> :}
 -- odd numbers: FAIL
---   Exception: ERROR: odds
+-- ...
+-- ... ERROR: odds
 --     2 checks failed in this checklist:
 --     -Failed check 'two is odd' with: 2
 --     -Failed check '7 + 3 is odd' with: 10
@@ -292,7 +293,8 @@ discardCheck what = do
 --
 -- >>> defaultMain test
 -- someFun result: FAIL
---   Exception: ERROR: results for someFun
+-- ...
+-- ... ERROR: results for someFun
 --     3 checks failed in this checklist:
 --     --- Input for below: The answer to the universe is 18?
 --     -Failed check: foo
