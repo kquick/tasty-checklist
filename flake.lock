@@ -7,11 +7,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1768050190,
-        "narHash": "sha256-xjWlwQpodI/YA/92fFjWAM7MQeUjNkP6FIUv8RyT41g=",
+        "lastModified": 1782176683,
+        "narHash": "sha256-aryt6Y4oiZnJTqIyg3PXFAsK3Q9YoeiqY7JSC7Vhcps=",
         "owner": "kquick",
         "repo": "nix-levers",
-        "rev": "1ba59d23c84bf0699b4a82ffcf154ec832ffabeb",
+        "rev": "0ecb88408511b04cd91e3ce73988b7240dc53f1d",
         "type": "github"
       },
       "original": {
@@ -38,11 +38,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1777270315,
-        "narHash": "sha256-yKB4G6cKsQsWN7M6rZGk6gkJPDNPIzT05y4qzRyCDlI=",
+        "lastModified": 1781268102,
+        "narHash": "sha256-Zn5KTggEmUB3lXn/ccERNcBdddE6IaOFber9dWViWDg=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "6368eda62c9775c38ef7f714b2555a741c20c72d",
+        "rev": "49a4bd0573c376468dd7996ddb6f9fa31d8c4d97",
         "type": "github"
       },
       "original": {
@@ -55,11 +55,11 @@
     "parameterized-utils-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1776685697,
-        "narHash": "sha256-1VnTKp6R8ubRrWx3g1zZsds3beDjICbhJ/3VlrbjbhQ=",
+        "lastModified": 1782137001,
+        "narHash": "sha256-EkXMzAleFsKoiaQnYnuGxRPflrtnP1WkA7wc1oXcToA=",
         "owner": "GaloisInc",
         "repo": "parameterized-utils",
-        "rev": "84825020cfa306323d2182e6952068baf89a07cf",
+        "rev": "f4be8cb7aec4b1fb9a1089b38810c9d02b841dbc",
         "type": "github"
       },
       "original": {
