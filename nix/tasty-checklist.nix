@@ -5,7 +5,7 @@
 mkDerivation {
   pname = "tasty-checklist";
   version = "1.0.10.0";
-  src = ./.;
+  src = ./..;
   libraryHaskellDepends = [
     base containers exceptions parameterized-utils text
   ];
